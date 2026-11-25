@@ -1,0 +1,5 @@
+# keep the single-file app and sources LF everywhere, so a clone on any OS
+# produces the same bytes the verifier hashed
+* text=auto eol=lf
+*.png binary
+*.svg text eol=lf
