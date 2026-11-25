@@ -1,6 +1,10 @@
 # ChatGPT UI — single-file clone
 
+[![verify](https://github.com/amirreza-anari/chatgpt-single-file/actions/workflows/verify.yml/badge.svg)](https://github.com/amirreza-anari/chatgpt-single-file/actions/workflows/verify.yml) [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 A replica of the ChatGPT web interface in **one HTML file**. No framework, no bundler, no CDN, no build step at runtime, no telemetry — open `index.html` in a browser and it runs. Bring your own OpenAI-compatible API key.
+
+**Live demo:** https://amirreza-anari.github.io/chatgpt-single-file/ — same single file served by GitHub Pages. Your key stays in your own browser.
 
 > **Unofficial.** This is an educational UI study, not affiliated with, endorsed by, or connected to OpenAI. "ChatGPT" and OpenAI's marks belong to OpenAI. No OpenAI code, assets or data are included — the interface was re-measured from screenshots of the signed-in web UI, and the icon geometry was redrawn in a local SVG sheet.
 
@@ -67,6 +71,7 @@ build/_engine.js            all app JavaScript
 build/_sprite.svg           icon geometry source (already inlined into the sheet)
 build/rebuild.py            concatenates the two sources into index.html
 build/verify.py             rebuild + structural/purity checks
+.github/workflows/verify.yml  CI: rebuild, verify, and fail if index.html drifts from sources
 preview/                    the screenshots above
 legacy/                     first-attempt prototype and its unused asset, kept for reference
 ```
@@ -78,7 +83,7 @@ python build/rebuild.py    # -> index.html
 python build/verify.py     # rebuild, then check
 ```
 
-Requires Python 3 and Node (the verifier runs `node --check` on the engine). `verify.py` fails loudly on source drift: a `$("id")` in the engine with no matching element, unbalanced CSS braces, a JS syntax error, a leftover stub control, or an external asset reference that would break the one-file rule.
+Requires Python 3 and Node (the verifier runs `node --check` on the engine). `verify.py` fails loudly on source drift: a `$("id")` in the engine with no matching element, unbalanced CSS braces, a JS syntax error, a leftover stub control, or an external asset reference that would break the one-file rule. CI runs the same script on every push and pull request, then `git diff --exit-code index.html` so a commit that forgets to rebuild fails instead of silently shipping a stale file.
 
 ## Privacy
 
@@ -87,7 +92,7 @@ The API key lives only in this browser's `localStorage` and is sent only to the 
 ## Known limits
 
 - The chat surface was verified in headless Chrome at desktop width; there are media queries at ≤820 px and ≤900 px but the layout has not been tested on a real phone.
-- `build/verify.py` is the only automated check (structure and single-file purity) — there is no test suite and no CI.
+- `build/verify.py` is the only automated check (structure, source/index consistency, single-file purity) — there is no behavioural test suite; CI runs the verifier, not the UI.
 - A full generate → stream round-trip needs your own API key, so it is not exercised by the checks above.
 - Not implemented: voice mode, projects, canvas, temporary chats, mid-thread model switching, file uploads other than text/image.
 

@@ -1,0 +1,27 @@
+name: verify
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # rebuilds index.html from build/_shell.html + build/_engine.js, then checks
+      # ids, CSS braces, JS syntax, leftover stubs and single-file purity
+      - name: Rebuild and verify the single file
+        run: python3 build/verify.py
+
+      # a commit that edits the sources without rebuilding fails here instead of
+      # silently shipping a stale index.html
+      - name: Committed index.html must match its sources
+        run: git diff --exit-code -- index.html
